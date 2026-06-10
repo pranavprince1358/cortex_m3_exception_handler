@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "ARM Cortex-M3",
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "compilerArgs": [
+                "-mcpu=cortex-m3",
+                "-mthumb"
+            ],
+            "intelliSenseMode": "gcc-arm",
+            "cStandard": "c11",
+            "defines": [
+                "CORTEX_M3"
+            ]
+        }
+    ],
+    "version": 4
+}
