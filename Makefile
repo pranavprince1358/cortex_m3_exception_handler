@@ -106,5 +106,22 @@ clean:
 	rm -rf build/
 	rm -f $(TARGET).elf $(TARGET).bin
 
+# ── Run in QEMU Cortex-M3 emulator ─────────────────────────
+qemu: $(TARGET).elf
+	qemu-system-arm \
+		-machine lm3s6965evb \
+		-cpu cortex-m3 \
+		-nographic \
+		-kernel build/$(TARGET).elf
+
+# ── Run in QEMU with GDB server (for debugging) ─────────────
+qemu-gdb: $(TARGET).elf
+	qemu-system-arm \
+		-machine lm3s6965evb \
+		-cpu cortex-m3 \
+		-nographic \
+		-kernel build/$(TARGET).elf \
+		-S -gdb tcp::3333
+
 # ── Phony targets ───────────────────────────────────────────
-.PHONY: all build_dirs analyze disasm clean
+.PHONY: all build_dirs analyze disasm clean qemu qemu-gdb
