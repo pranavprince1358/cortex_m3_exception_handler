@@ -120,7 +120,7 @@ void UsageFault_Handler(void)
     while (1);
 }
 
-/* BusFault Handler */
+/* BusFault Handler - hard to trigger in QEMU due to absence of bus error response path*/
 void BusFault_Handler(void)
 {
     volatile uint32_t cfsr = SCB_CFSR;
