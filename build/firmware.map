@@ -4,9 +4,18 @@ Discarded input sections
  .text          0x00000000        0x0 build/src/main.o
  .data          0x00000000        0x0 build/src/main.o
  .bss           0x00000000        0x0 build/src/main.o
+ .text.trigger_div_zero
+                0x00000000       0x2c build/src/main.o
+ .text.trigger_undef_instr
+                0x00000000       0x14 build/src/main.o
  .text          0x00000000        0x0 build/startup/startup.o
  .data          0x00000000        0x0 build/startup/startup.o
  .bss           0x00000000        0x0 build/startup/startup.o
+ .text.Default_Handler
+                0x00000000        0x8 build/startup/startup.o
+ .text          0x00000000        0x0 build/src/fault_handlers.o
+ .data          0x00000000        0x0 build/src/fault_handlers.o
+ .bss           0x00000000        0x0 build/src/fault_handlers.o
 
 Memory Configuration
 
@@ -19,6 +28,7 @@ Linker script and memory map
 
 LOAD build/src/main.o
 LOAD build/startup/startup.o
+LOAD build/src/fault_handlers.o
                 0x20010000                        _estack = (ORIGIN (RAM) + LENGTH (RAM))
                 0x00000400                        _Min_Stack_Size = 0x400
 
@@ -29,7 +39,7 @@ LOAD build/startup/startup.o
                 0x00000000                vector_table
                 0x00000040                        . = ALIGN (0x4)
 
-.text           0x00000040      0x1a0
+.text           0x00000040      0x95c
                 0x00000040                        . = ALIGN (0x4)
  *(.text)
  *(.text*)
@@ -38,110 +48,143 @@ LOAD build/startup/startup.o
  .text.uart_print
                 0x00000070       0x2a build/src/main.o
  *fill*         0x0000009a        0x2 
- .text.main     0x0000009c       0x6c build/src/main.o
-                0x0000009c                main
+ .text.trigger_null_deref
+                0x0000009c       0x28 build/src/main.o
+ .text.main     0x000000c4       0x58 build/src/main.o
+                0x000000c4                main
  .text.Reset_Handler
-                0x00000108       0x5c build/startup/startup.o
-                0x00000108                Reset_Handler
- .text.Default_Handler
-                0x00000164        0x8 build/startup/startup.o
-                0x00000164                DebugMon_Handler
-                0x00000164                HardFault_Handler
-                0x00000164                SysTick_Handler
-                0x00000164                PendSV_Handler
-                0x00000164                NMI_Handler
-                0x00000164                UsageFault_Handler
-                0x00000164                Default_Handler
-                0x00000164                MemManage_Handler
-                0x00000164                SVC_Handler
-                0x00000164                BusFault_Handler
+                0x0000011c       0x5c build/startup/startup.o
+                0x0000011c                Reset_Handler
+ .text.uart_putchar
+                0x00000178       0x30 build/src/fault_handlers.o
+ .text.uart_print
+                0x000001a8       0x2a build/src/fault_handlers.o
+ *fill*         0x000001d2        0x2 
+ .text.uart_print_hex
+                0x000001d4       0x58 build/src/fault_handlers.o
+ .text.decode_cfsr
+                0x0000022c      0x164 build/src/fault_handlers.o
+                0x0000022c                decode_cfsr
+ .text.HardFault_Handler
+                0x00000390      0x114 build/src/fault_handlers.o
+                0x00000390                HardFault_Handler
+ .text.UsageFault_Handler
+                0x000004a4       0x88 build/src/fault_handlers.o
+                0x000004a4                UsageFault_Handler
+ .text.BusFault_Handler
+                0x0000052c       0x70 build/src/fault_handlers.o
+                0x0000052c                BusFault_Handler
+ .text.NMI_Handler
+                0x0000059c       0x14 build/src/fault_handlers.o
+                0x0000059c                NMI_Handler
+ .text.MemManage_Handler
+                0x000005b0       0x14 build/src/fault_handlers.o
+                0x000005b0                MemManage_Handler
+ .text.SVC_Handler
+                0x000005c4        0x8 build/src/fault_handlers.o
+                0x000005c4                SVC_Handler
+ .text.DebugMon_Handler
+                0x000005cc        0x8 build/src/fault_handlers.o
+                0x000005cc                DebugMon_Handler
+ .text.PendSV_Handler
+                0x000005d4        0x8 build/src/fault_handlers.o
+                0x000005d4                PendSV_Handler
+ .text.SysTick_Handler
+                0x000005dc        0x8 build/src/fault_handlers.o
+                0x000005dc                SysTick_Handler
  *(.rodata)
- .rodata        0x0000016c       0x74 build/src/main.o
+ .rodata        0x000005e4       0xf2 build/src/main.o
+ *fill*         0x000006d6        0x2 
+ .rodata        0x000006d8      0x2c2 build/src/fault_handlers.o
  *(.rodata*)
-                0x000001e0                        . = ALIGN (0x4)
-                0x000001e0                        _etext = .
-                0x000001e0                        _sidata = LOADADDR (.data)
+                0x0000099c                        . = ALIGN (0x4)
+ *fill*         0x0000099a        0x2 
+                0x0000099c                        _etext = .
+                0x0000099c                        _sidata = LOADADDR (.data)
 
-.glue_7         0x000001e0        0x0
- .glue_7        0x000001e0        0x0 linker stubs
+.glue_7         0x0000099c        0x0
+ .glue_7        0x0000099c        0x0 linker stubs
 
-.glue_7t        0x000001e0        0x0
- .glue_7t       0x000001e0        0x0 linker stubs
+.glue_7t        0x0000099c        0x0
+ .glue_7t       0x0000099c        0x0 linker stubs
 
-.vfp11_veneer   0x000001e0        0x0
- .vfp11_veneer  0x000001e0        0x0 linker stubs
+.vfp11_veneer   0x0000099c        0x0
+ .vfp11_veneer  0x0000099c        0x0 linker stubs
 
-.v4_bx          0x000001e0        0x0
- .v4_bx         0x000001e0        0x0 linker stubs
+.v4_bx          0x0000099c        0x0
+ .v4_bx         0x0000099c        0x0 linker stubs
 
-.iplt           0x000001e0        0x0
- .iplt          0x000001e0        0x0 build/src/main.o
+.iplt           0x0000099c        0x0
+ .iplt          0x0000099c        0x0 build/src/main.o
 
-.rel.dyn        0x000001e0        0x0
- .rel.iplt      0x000001e0        0x0 build/src/main.o
+.rel.dyn        0x0000099c        0x0
+ .rel.iplt      0x0000099c        0x0 build/src/main.o
 
-.data           0x20000000        0x4 load address 0x000001e0
+.data           0x20000000        0x0 load address 0x0000099c
                 0x20000000                        . = ALIGN (0x4)
                 0x20000000                        _sdata = .
  *(.data)
  *(.data*)
- .data.initialized_var
-                0x20000000        0x4 build/src/main.o
-                0x20000000                initialized_var
-                0x20000004                        . = ALIGN (0x4)
-                0x20000004                        _edata = .
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        _edata = .
 
-.igot.plt       0x20000004        0x0 load address 0x000001e4
- .igot.plt      0x20000004        0x0 build/src/main.o
+.igot.plt       0x20000000        0x0 load address 0x0000099c
+ .igot.plt      0x20000000        0x0 build/src/main.o
 
-.bss            0x20000004        0x4 load address 0x000001e4
-                0x20000004                        . = ALIGN (0x4)
-                0x20000004                        _sbss = .
+.bss            0x20000000        0x0 load address 0x0000099c
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        _sbss = .
  *(.bss)
  *(.bss*)
- .bss.uninitialized_var
-                0x20000004        0x4 build/src/main.o
-                0x20000004                uninitialized_var
  *(COMMON)
-                0x20000008                        . = ALIGN (0x4)
-                0x20000008                        _ebss = .
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        _ebss = .
 OUTPUT(build/firmware.elf elf32-littlearm)
 LOAD linker stubs
 
-.debug_info     0x00000000      0x257
- .debug_info    0x00000000      0x11c build/src/main.o
- .debug_info    0x0000011c      0x13b build/startup/startup.o
+.debug_info     0x00000000      0x516
+ .debug_info    0x00000000      0x18a build/src/main.o
+ .debug_info    0x0000018a      0x13b build/startup/startup.o
+ .debug_info    0x000002c5      0x251 build/src/fault_handlers.o
 
-.debug_abbrev   0x00000000      0x1bc
- .debug_abbrev  0x00000000       0xd5 build/src/main.o
- .debug_abbrev  0x000000d5       0xe7 build/startup/startup.o
+.debug_abbrev   0x00000000      0x327
+ .debug_abbrev  0x00000000      0x11b build/src/main.o
+ .debug_abbrev  0x0000011b       0xe7 build/startup/startup.o
+ .debug_abbrev  0x00000202      0x125 build/src/fault_handlers.o
 
-.debug_aranges  0x00000000       0x58
+.debug_aranges  0x00000000       0xf0
  .debug_aranges
-                0x00000000       0x30 build/src/main.o
+                0x00000000       0x48 build/src/main.o
  .debug_aranges
-                0x00000030       0x28 build/startup/startup.o
+                0x00000048       0x28 build/startup/startup.o
+ .debug_aranges
+                0x00000070       0x80 build/src/fault_handlers.o
 
 .debug_rnglists
-                0x00000000       0x38
+                0x00000000       0xa8
  .debug_rnglists
-                0x00000000       0x1f build/src/main.o
+                0x00000000       0x31 build/src/main.o
  .debug_rnglists
-                0x0000001f       0x19 build/startup/startup.o
+                0x00000031       0x19 build/startup/startup.o
+ .debug_rnglists
+                0x0000004a       0x5e build/src/fault_handlers.o
 
-.debug_line     0x00000000      0x1b3
- .debug_line    0x00000000       0xfc build/src/main.o
- .debug_line    0x000000fc       0xb7 build/startup/startup.o
+.debug_line     0x00000000      0x58a
+ .debug_line    0x00000000      0x14a build/src/main.o
+ .debug_line    0x0000014a       0xb7 build/startup/startup.o
+ .debug_line    0x00000201      0x389 build/src/fault_handlers.o
 
-.debug_str      0x00000000      0x1be
- .debug_str     0x00000000      0x1be build/src/main.o
-                                0x1a0 (size before relaxing)
- .debug_str     0x000001be      0x1b5 build/startup/startup.o
+.debug_str      0x00000000      0x2cb
+ .debug_str     0x00000000      0x2cb build/src/main.o
+                                0x1ca (size before relaxing)
+ .debug_str     0x000002cb      0x1b5 build/startup/startup.o
+ .debug_str     0x000002cb      0x24a build/src/fault_handlers.o
 
 .comment        0x00000000       0x26
  .comment       0x00000000       0x26 build/src/main.o
                                  0x27 (size before relaxing)
  .comment       0x00000026       0x27 build/startup/startup.o
+ .comment       0x00000026       0x27 build/src/fault_handlers.o
 
 .ARM.attributes
                 0x00000000       0x2d
@@ -149,7 +192,10 @@ LOAD linker stubs
                 0x00000000       0x2d build/src/main.o
  .ARM.attributes
                 0x0000002d       0x2d build/startup/startup.o
+ .ARM.attributes
+                0x0000005a       0x2d build/src/fault_handlers.o
 
-.debug_frame    0x00000000       0xc4
- .debug_frame   0x00000000       0x7c build/src/main.o
- .debug_frame   0x0000007c       0x48 build/startup/startup.o
+.debug_frame    0x00000000      0x2c0
+ .debug_frame   0x00000000       0xdc build/src/main.o
+ .debug_frame   0x000000dc       0x48 build/startup/startup.o
+ .debug_frame   0x00000124      0x19c build/src/fault_handlers.o
