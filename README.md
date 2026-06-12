@@ -249,8 +249,10 @@ SCB_SHCSR |=
     SHCSR_USGFAULTENA |
     SHCSR_BUSFAULTENA |
     SHCSR_MEMFAULTENA;
+```
 
-````md
+---
+
 ## Fault Status Register Decoding
 
 The project decodes information from Cortex-M3 fault registers.
