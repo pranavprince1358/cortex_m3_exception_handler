@@ -1,4 +1,4 @@
-# ARM Cortex-M3 Bare-Metal Startup, Exception Handling, and QEMU Development Environment
+# ARM Cortex-M3 Bare-Metal Startup, Fault Handling, and QEMU Development Environment
 
 A bare-metal ARM Cortex-M3 project demonstrating the complete boot process from reset to application execution, including custom startup code, exception handling, linker script development, UART communication, and execution/debugging using QEMU.
 
@@ -18,6 +18,19 @@ A bare-metal ARM Cortex-M3 project demonstrating the complete boot process from 
 * ELF, BIN, and MAP file generation
 * Memory layout verification
 * Freestanding embedded development without vendor SDKs
+
+### Fault Handling Features
+
+* HardFault handler implementation
+* UsageFault handler implementation
+* BusFault handler implementation
+* SCB fault register decoding
+* UART-based fault diagnostics
+* Divide-by-zero trap support
+* Undefined instruction fault testing
+* Fault escalation analysis
+* Cortex-M3 exception debugging
+* CFSR, HFSR, BFAR, and MMFAR inspection
 
 ---
 
@@ -201,6 +214,136 @@ The implementation demonstrates:
 No HAL, SDK, or vendor libraries are used.
 
 ---
+
+## Cortex-M3 Fault Handling
+
+This project extends the startup framework with real Cortex-M3 exception and fault handlers.
+
+Implemented fault handlers:
+
+* HardFault_Handler
+* UsageFault_Handler
+* BusFault_Handler
+
+The handlers read and decode System Control Block (SCB) fault status registers and report diagnostic information over UART.
+
+### SCB Registers Used
+
+| Register | Address |
+|----------|----------|
+| CFSR | 0xE000ED28 |
+| HFSR | 0xE000ED2C |
+| MMFAR | 0xE000ED34 |
+| BFAR | 0xE000ED38 |
+
+The project demonstrates direct register-level access to Cortex-M3 system registers without CMSIS or vendor libraries.
+
+---
+
+## Exception Configuration
+
+Configurable fault handlers are enabled through the System Handler Control and State Register (SHCSR).
+
+```c
+SCB_SHCSR |=
+    SHCSR_USGFAULTENA |
+    SHCSR_BUSFAULTENA |
+    SHCSR_MEMFAULTENA;
+
+````md
+## Fault Status Register Decoding
+
+The project decodes information from Cortex-M3 fault registers.
+
+### Hard Fault Status Register (HFSR)
+
+| Bit | Meaning |
+|------|---------|
+| FORCED | Escalated configurable fault |
+| VECTTBL | Vector table read fault |
+
+### Usage Fault Status Register (UFSR)
+
+| Bit | Meaning |
+|------|---------|
+| DIVBYZERO | Divide-by-zero execution |
+| UNDEFINSTR | Undefined instruction execution |
+| UNALIGNED | Unaligned memory access |
+
+### Bus Fault Status Register (BFSR)
+
+| Bit | Meaning |
+|------|---------|
+| PRECISERR | Precise data bus fault |
+| IBUSERR | Instruction bus fault |
+| BFARVALID | BFAR contains valid address |
+
+Fault causes can therefore be diagnosed without requiring a debugger.
+
+---
+
+## Fault Injection Tests
+
+The project intentionally generates processor exceptions to verify fault handling logic.
+
+### Divide By Zero
+
+Enabled using:
+
+```c
+SCB_CCR |= CCR_DIV_0_TRP;
+```
+
+Test:
+
+```c
+volatile uint32_t result = a / b;
+```
+
+Expected output:
+
+```text
+=== USAGE FAULT ===
+Cause: Divide by zero
+```
+
+---
+
+### Undefined Instruction
+
+Generated using:
+
+```c
+__asm volatile(".hword 0xDE00");
+```
+
+Expected output:
+
+```text
+=== USAGE FAULT ===
+Cause: Undefined instruction
+```
+
+---
+
+### Fault Escalation
+
+If UsageFault handling is disabled:
+
+```c
+SCB_SHCSR &= ~SHCSR_USGFAULTENA;
+```
+
+the UsageFault escalates into a HardFault.
+
+Expected output:
+
+```text
+=== HARD FAULT ===
+Cause: Escalated configurable fault
+```
+
+This demonstrates Cortex-M3 fault escalation behavior.
 
 ## Build Requirements
 
@@ -416,23 +559,35 @@ This project was created to understand:
 * Freestanding ARM development
 * ARM GCC toolchain internals
 
+### Advanced Topics
+
+* Cortex-M3 fault architecture
+* HardFault analysis
+* UsageFault analysis
+* BusFault analysis
+* SCB register programming
+* Fault status register decoding
+* Fault escalation mechanisms
+* Divide-by-zero trapping
+* Undefined instruction faults
+* Exception debugging using UART
+
 ---
 
 ## Future Improvements
 
-* Dedicated HardFault handler
-* Stack frame extraction
-* Fault register decoding
-* MemManage fault handling
-* BusFault analysis
-* UsageFault analysis
-* SysTick timer support
+* Stack frame extraction from exception entry
+* Automatic register dump (R0-R3, R12, LR, PC, xPSR)
+* MemManage fault demonstrations
+* Recovery-oriented fault handlers
+* Fault logging to RAM
+* Persistent crash reporting
+* Post-mortem crash analysis
 * SVC implementation
 * PendSV context switching
-* Simple cooperative scheduler
+* SysTick scheduling
+* Cooperative scheduler
 * RTOS-style task switching
-
----
 
 ## License
 
