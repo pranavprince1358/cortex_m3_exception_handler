@@ -1,23 +1,19 @@
-MAIN-4
-/* main.c
- * Bare metal UART output on QEMU lm3s6965evb (Stellaris Cortex-M3)
+//MAIN-4
+/* Bare metal UART output on QEMU lm3s6965evb (Stellaris Cortex-M3)
  * UART0 base: 0x4000C000
  * DR  (Data Register):    offset 0x000  → write byte here to transmit
  * FR  (Flag Register):    offset 0x018  → bit 5 = TXFF (TX FIFO full)
- *
- * No clock config needed on QEMU — UART is ready at reset
- * On real hardware you'd enable UART clock via SYSCTL first
  */
 
 #include <stdint.h>
 
-/* ── UART0 Registers (Stellaris/TM4C style) ── */
+/* UART0 Registers (Stellaris/TM4C style) */
 #define UART0_BASE      (0x4000C000UL)
 #define UART0_DR        (*((volatile uint32_t *)(UART0_BASE + 0x000)))
 #define UART0_FR        (*((volatile uint32_t *)(UART0_BASE + 0x018)))
 #define UART_FR_TXFF    (1U << 5)   /* TX FIFO full flag — wait when set */
 
-/* ── Send one character ── */
+/* Send one character */
 static void uart_putchar(char c)
 {
     /* Wait until TX FIFO has space */
@@ -25,7 +21,7 @@ static void uart_putchar(char c)
     UART0_DR = (uint32_t)c;
 }
 
-/* ── Send a string ── */
+/* Send a string */
 static void uart_print(const char *str)
 {
     while (*str) {
@@ -33,7 +29,6 @@ static void uart_print(const char *str)
     }
 }
 
-/* ── Main ── */
 int main(void)
 {
     uart_print("Boot OK\r\n");
@@ -55,7 +50,7 @@ int main(void)
 }
 
 OUTPUT:
-pranav@pranav-Vivobook-ASUSLaptop-M1605YA-M1605YA:~/VSCode/cortex-m3-bare-metal$ make clean && make
+make clean && make
 rm -rf build/
 rm -f firmware.elf firmware.bin
 mkdir -p build/src
@@ -68,9 +63,7 @@ Memory region         Used Size  Region Size  %age Used
              RAM:           0 B        64 KB      0.00%
 arm-none-eabi-objcopy -O binary build/firmware.elf build/firmware.bin
 
-════════════════════════════════════════════
-  SECTION LAYOUT (verify VMA/LMA)
-════════════════════════════════════════════
+SECTION LAYOUT (verify VMA/LMA)
 arm-none-eabi-objdump -h build/firmware.elf
 
 build/firmware.elf:     file format elf32-littlearm
@@ -104,9 +97,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
  12 .debug_frame  000000c4  00000000  00000000  000019d8  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
-════════════════════════════════════════════
-  LINKER SYMBOLS (verify addresses)
-════════════════════════════════════════════
+LINKER SYMBOLS (verify addresses)
 arm-none-eabi-nm build/firmware.elf | grep -E "_sdata|_edata|_sidata|_sbss|_ebss|_estack|_etext"
 20000000 B _ebss
 20000000 D _edata
@@ -116,15 +107,13 @@ arm-none-eabi-nm build/firmware.elf | grep -E "_sdata|_edata|_sidata|_sbss|_ebss
 20000000 D _sdata
 000001dc A _sidata
 
-════════════════════════════════════════════
-  FIRMWARE SIZE
-════════════════════════════════════════════
+FIRMWARE SIZE
 arm-none-eabi-size build/firmware.elf
    text    data     bss     dec     hex filename
     476       0       0     476     1dc build/firmware.elf
 
 QEMU OUTPUT:
-pranav@pranav-Vivobook-ASUSLaptop-M1605YA-M1605YA:~/VSCode/cortex-m3-bare-metal$ make qemu
+make qemu
 arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -Tlinker/cortex_m3.ld -nostdlib -Wl,--gc-sections -Wl,-Map=build/firmware.map -Wl,--print-memory-usage  build/src/main.o  build/startup/startup.o -o build/firmware.elf
 Memory region         Used Size  Region Size  %age Used
            FLASH:         476 B       256 KB      0.18%

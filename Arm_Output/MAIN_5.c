@@ -1,11 +1,10 @@
-MAIN-5
+//MAIN-5
 #include <stdint.h>
 
-/* ── Your self-tests ── */
 volatile uint32_t initialized_var = 0x12345678;
 volatile uint32_t uninitialized_var;
 
-/* ── UART0 for QEMU visibility ── */
+/* UART0 for QEMU visibility */
 #define UART0_BASE   (0x4000C000UL)
 #define UART0_DR     (*((volatile uint32_t *)(UART0_BASE + 0x000)))
 #define UART0_FR     (*((volatile uint32_t *)(UART0_BASE + 0x018)))
@@ -22,14 +21,14 @@ static void uart_print(const char *s) {
 
 int main(void)
 {
-    /* ── Test 1: .data copy ── */
+    /* .data copy */
     if (initialized_var != 0x12345678) {
         uart_print("FAIL: .data copy broken\r\n");
         while(1);
     }
     uart_print("PASS: .data copy OK\r\n");
 
-    /* ── Test 2: .bss zeroing ── */
+    /* .bss zeroing */
     if (uninitialized_var != 0) {
         uart_print("FAIL: .bss not zeroed\r\n");
         while(1);
@@ -47,7 +46,7 @@ int main(void)
 }
 
 OUTPUT:
-pranav@pranav-Vivobook-ASUSLaptop-M1605YA-M1605YA:~/VSCode/cortex-m3-bare-metal$ make clean && make
+make clean && make
 rm -rf build/
 rm -f firmware.elf firmware.bin
 mkdir -p build/src
@@ -60,9 +59,7 @@ Memory region         Used Size  Region Size  %age Used
              RAM:           8 B        64 KB      0.01%
 arm-none-eabi-objcopy -O binary build/firmware.elf build/firmware.bin
 
-════════════════════════════════════════════
-  SECTION LAYOUT (verify VMA/LMA)
-════════════════════════════════════════════
+SECTION LAYOUT (verify VMA/LMA)
 arm-none-eabi-objdump -h build/firmware.elf
 
 build/firmware.elf:     file format elf32-littlearm
@@ -96,9 +93,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
  12 .debug_frame  000000c4  00000000  00000000  0000286c  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
-════════════════════════════════════════════
-  LINKER SYMBOLS (verify addresses)
-════════════════════════════════════════════
+LINKER SYMBOLS (verify addresses)
 arm-none-eabi-nm build/firmware.elf | grep -E "_sdata|_edata|_sidata|_sbss|_ebss|_estack|_etext"
 20000008 B _ebss
 20000004 D _edata
@@ -108,15 +103,13 @@ arm-none-eabi-nm build/firmware.elf | grep -E "_sdata|_edata|_sidata|_sbss|_ebss
 20000000 D _sdata
 000001e0 A _sidata
 
-════════════════════════════════════════════
-  FIRMWARE SIZE
-════════════════════════════════════════════
+FIRMWARE SIZE
 arm-none-eabi-size build/firmware.elf
    text    data     bss     dec     hex filename
     480       4       4     488     1e8 build/firmware.elf
     
 QEMU OUTPUT:
-pranav@pranav-Vivobook-ASUSLaptop-M1605YA-M1605YA:~/VSCode/cortex-m3-bare-metal$ make qemu
+make qemu
 arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -Tlinker/cortex_m3.ld -nostdlib -Wl,--gc-sections -Wl,-Map=build/firmware.map -Wl,--print-memory-usage  build/src/main.o  build/startup/startup.o -o build/firmware.elf
 Memory region         Used Size  Region Size  %age Used
            FLASH:         484 B       256 KB      0.18%

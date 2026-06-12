@@ -1,4 +1,4 @@
-MAIN-3
+//MAIN-3
 #include <stdint.h>
 
 volatile uint32_t initialized_var = 0x12345678;
@@ -27,7 +27,7 @@ int main(void)
 }
 
 OUTPUT:
-pranav@pranav-Vivobook-ASUSLaptop-M1605YA-M1605YA:~/VSCode/cortex-m3-bare-metal$ make
+make
 mkdir -p build/src
 mkdir -p build/startup
 arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -Tlinker/cortex_m3.ld -nostdlib -Wl,--gc-sections -Wl,-Map=build/firmware.map -Wl,--print-memory-usage  build/src/main.o  build/startup/startup.o -o build/firmware.elf
@@ -36,9 +36,7 @@ Memory region         Used Size  Region Size  %age Used
              RAM:           8 B        64 KB      0.01%
 arm-none-eabi-objcopy -O binary build/firmware.elf build/firmware.bin
 
-════════════════════════════════════════════
-  SECTION LAYOUT (verify VMA/LMA)
-════════════════════════════════════════════
+SECTION LAYOUT (verify VMA/LMA)
 arm-none-eabi-objdump -h build/firmware.elf
 
 build/firmware.elf:     file format elf32-littlearm
@@ -72,9 +70,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
  12 .debug_frame  00000074  00000000  00000000  0000276c  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
-════════════════════════════════════════════
-  LINKER SYMBOLS (verify addresses)
-════════════════════════════════════════════
+LINKER SYMBOLS (verify addresses)
 arm-none-eabi-nm build/firmware.elf | grep -E "_sdata|_edata|_sidata|_sbss|_ebss|_estack|_etext"
 20000008 B _ebss
 20000004 D _edata
@@ -84,9 +80,7 @@ arm-none-eabi-nm build/firmware.elf | grep -E "_sdata|_edata|_sidata|_sbss|_ebss
 20000000 D _sdata
 000000fc A _sidata
 
-════════════════════════════════════════════
-  FIRMWARE SIZE
-════════════════════════════════════════════
+FIRMWARE SIZE
 arm-none-eabi-size build/firmware.elf
    text    data     bss     dec     hex filename
     252       4       4     260     104 build/firmware.elf
